@@ -1,7 +1,7 @@
 <?php
 
 /* @var $this \yii\web\View */
-/* @var $ckImageManagerForm istvan0304\imagemanager\models\CkImageForm */
+/* @var $ckImageManagerForm istvan0304\ckfilemanager\models\CkImageForm */
 
 /* @var $ckImages */
 
@@ -9,7 +9,7 @@ use yii\widgets\Pjax; ?>
 
 <div class="ck-details">
     <div class="ck-details-header">
-        <h4><?= Yii::t('ckimage', 'Details') ?></h4>
+        <h4><?= Yii::t('ckfile', 'Details') ?></h4>
         <a href="#" class="ck-close ck-details-close"></a>
     </div>
     <div class="ck-details-body"></div>
@@ -17,7 +17,8 @@ use yii\widgets\Pjax; ?>
 
 <?php echo $this->render('_handlerRow',
     [
-        'ckImageManagerForm' => $ckImageManagerForm,
+        'ckFileManagerForm' => $ckFileManagerForm,
+        'acceptFiles' => $acceptFiles
     ]); ?>
 
 <div id="ck-upload-status">
@@ -27,15 +28,15 @@ use yii\widgets\Pjax; ?>
             <div class="ck-progress"><span id="ck-percentage"></span></div>
         </div>
         <button id="ck-upload-details" class="ck-btn ck-btn-second"><i
-                    class="fas fa-info-circle"></i> <?= Yii::t('ckimage', 'Details') ?></button>
+                    class="fas fa-info-circle"></i> <?= Yii::t('ckfile', 'Details') ?></button>
     </div>
 
 </div>
 
-<?php Pjax::begin(['id' => 'ck-pjax-image-list', 'options' => ['class' => 'ck-image-list']]); ?>
-<?php echo $this->render('_imageList',
+<?php Pjax::begin(['id' => 'ck-pjax-file-list', 'options' => ['class' => 'ck-file-list']]); ?>
+<?php echo $this->render('_fileList',
     [
-        'ckImages' => $ckImages
+        'ckFiles' => $ckFiles
     ]); ?>
 
 <?php Pjax::end(); ?>
@@ -48,6 +49,6 @@ use yii\widgets\Pjax; ?>
 </div>
 
 <aside id="ck-sidebar">
-    <p class="ck-no-select"><?= Yii::t('ckimage', 'No image selected.') ?></p>
+    <p class="ck-no-select"><?= Yii::t('ckfile', 'No image selected.') ?></p>
     <div class="ck-sidebar-content"></div>
 </aside>

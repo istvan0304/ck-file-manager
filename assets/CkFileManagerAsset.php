@@ -10,7 +10,7 @@ use yii\web\AssetBundle;
  */
 class CkFileManagerAsset extends AssetBundle
 {
-    public $sourcePath = '@vendor/istvan0304/ck-file-manager/assets';
+    public $sourcePath = '@vendor/istvan0304/ckfilemanager/assets';
 
     public $css = [
         'css/all.min.css',

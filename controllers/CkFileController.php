@@ -3,18 +3,16 @@
 namespace istvan0304\ckfilemanager\controllers;
 
 use Yii;
-use istvan0304\ckfilemanager\models\CkImageSearch;
-use istvan0304\ckfilemanager\assets\CkImageManagerAsset;
-use istvan0304\ckfilemanager\components\UploadException;
-use istvan0304\ckfilemanager\models\CkImage;
-use istvan0304\ckfilemanager\models\CkImageForm;
+use istvan0304\ckfilemanager\{assets\CkFileManagerAsset,
+    models\CkFile,
+    models\CkFileForm,
+    models\CkFileSearch,
+    components\UploadException,
+    models\CkImage};
 use yii\filters\VerbFilter;
 use yii\helpers\Html;
 use yii\imagine\Image;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\web\Response;
-use yii\web\UploadedFile;
+use yii\web\{Controller, NotFoundHttpException, Response, UploadedFile};
 
 /**
  * Class CkFileController
@@ -31,35 +29,68 @@ class CkFileController extends Controller
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
-                    'index' => ['GET'],
-                    'preview-thumbnail' => ['GET'],
-                    'get-image' => ['GET'],
-                    'delete' => ['POST'],
-                    'search' => ['GET'],
+                    'image-manager' => ['get'],
+                    'file-manager' => ['get'],
+                    'preview-thumbnail' => ['get'],
+                    'upload' => ['post'],
+                    'get-details' => ['get'],
+                    'get-file' => ['get'],
+                    'delete' => ['post'],
+                    'ajax-search' => ['get'],
                 ],
             ],
         ];
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function actionIndex()
+    public function actionImageManager()
     {
-        $ckImageManagerForm = new CkImageForm();
-        $ckImages = CkImage::find()->all();
+        $ckFileManagerForm = new CkFileForm();
+        $ckImages = CkFile::find()->where(['type' => CkFile::TYPE_IMAGE])->all();
         $this->layout = "layout";
-        CkImageManagerAsset::register($this->view);
+        CkFileManagerAsset::register($this->view);
+        $acceptFiles = 'image/*';
 
-        foreach ($ckImages as $key => $ckImage) {
-            if (!$ckImage->isExistsFile()) {
-                unset($ckImages[$key]);
+        if($ckImages != null){
+            foreach ($ckImages as $key => $ckImage) {
+                if (!$ckImage->isExistsFile()) {
+                    unset($ckImages[$key]);
+                }
             }
         }
 
         return $this->render('index', [
-            'ckImageManagerForm' => $ckImageManagerForm,
-            'ckImages' => $ckImages
+            'ckFileManagerForm' => $ckFileManagerForm,
+            'ckFiles' => $ckImages,
+            'acceptFiles' => $acceptFiles
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function actionFileManager()
+    {
+        $ckFileManagerForm = new CkFileForm();
+        $ckFiles = CkFile::find()->all();
+        $this->layout = "layout";
+        CkFileManagerAsset::register($this->view);
+        $acceptFiles = 'application/pdf, image/jpeg, image/jpg, image/png, .doc, .docx, application/msword, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
+
+        if($ckFiles != null){
+            foreach ($ckFiles as $key => $ckFile) {
+                if (!$ckFile->isExistsFile()) {
+                    unset($ckFiles[$key]);
+                }
+            }
+        }
+
+        return $this->render('index', [
+            'ckFileManagerForm' => $ckFileManagerForm,
+            'ckFiles' => $ckFiles,
+            'acceptFiles' => $acceptFiles
         ]);
     }
 
@@ -77,14 +108,14 @@ class CkFileController extends Controller
             $response = [];
 
             if ($id != null && is_numeric($id)) {
-                $ckImageModel = CkImage::findOne(['id' => $id]);
+                $ckFileModel = CkFile::findOne(['id' => $id]);
 
-                if ($ckImageModel != null) {
+                if ($ckFileModel != null) {
                     $response['success'] = true;
-                    $response['template'] = $this->renderPartial('_details', ['ckImageArray' => $ckImageModel->toArray()]);
+                    $response['template'] = $this->renderPartial('_details', ['ckFileArray' => $ckFileModel->toArray()]);
                 } else {
                     $response['success'] = false;
-                    $response['message'] = Yii::t('ckimage', 'File not found!');
+                    $response['message'] = Yii::t('ckfile', 'File not found!');
                 }
             } else {
                 $response['success'] = false;
@@ -92,7 +123,7 @@ class CkFileController extends Controller
 
             return $response;
         } else {
-            throw new NotFoundHttpException(Yii::t('ckimage', 'Page not found!'));
+            throw new NotFoundHttpException(Yii::t('ckfile', 'Page not found!'));
         }
     }
 
@@ -104,64 +135,72 @@ class CkFileController extends Controller
      */
     public function actionUpload()
     {
+        ini_set("memory_limit", -1);
         Yii::$app->response->format = Response::FORMAT_JSON;
-        $ckImageFormModel = new CkImageForm();
+        $ckFileFormModel = new CkFileForm();
         $response = [];
         $successUpload = 0;
         $uploadResponse = '';
 
-        if ($ckImageFormModel->load(Yii::$app->request->post())) {
-            $files = UploadedFile::getInstances($ckImageFormModel, 'img_files');
+        if ($ckFileFormModel->load(Yii::$app->request->post())) {
+            $files = UploadedFile::getInstances($ckFileFormModel, 'uploaded_files');
 
             foreach ($files as $file) {
-                $ckImageModel = new CkImage();
-                $ckImageModel->img_file = $file;
-                $extension = $ckImageModel->img_file->getExtension();
+                $ckFileModel = new CkFile();
+                $ckFileModel->uploaded_file = $file;
+                $extension = $ckFileModel->uploaded_file->getExtension();
                 $uid = uniqid(time(), true);
                 $fileName = $uid . '.' . $extension;
-                $filePath = $ckImageModel->img_file->tempName;
+                $filePath = $ckFileModel->uploaded_file->tempName;
 
                 try {
-                    if ($ckImageModel->img_file->getHasError()) {
-                        throw new UploadException($ckImageModel->img_file->error);
+                    if ($ckFileModel->uploaded_file->getHasError()) {
+                        throw new UploadException($ckFileModel->uploaded_file->error);
                     }
 
-                    $ckImageModel->file_name = $fileName;
-                    $ckImageModel->orig_name = $ckImageModel->img_file->name;
-                    $ckImageModel->file_hash = hash_file('md5', $filePath);
-                    $ckImageModel->mime = $ckImageModel->img_file->type;
-                    $ckImageModel->extension = $extension;
-                    $ckImageModel->size = $ckImageModel->img_file->size;
+                    $ckFileModel->file_name = $fileName;
+                    $ckFileModel->orig_name = $ckFileModel->uploaded_file->name;
+                    $ckFileModel->file_hash = hash_file('md5', $filePath);
+                    $ckFileModel->mime = $ckFileModel->uploaded_file->type;
+                    $ckFileModel->extension = $extension;
+                    $ckFileModel->size = $ckFileModel->uploaded_file->size;
+                    $ckFileModel->setType();
 
-                    if ($ckImageModel->save()) {
-                        $ckImageModel->thumbnail = Image::thumbnail($filePath, CkImage::THUMBNAIL_WIDTH, CkImage::THUMBNAIL_WIDTH);
+                    if ($ckFileModel->save()) {
+                        if($ckFileModel->type == CkFile::TYPE_IMAGE){
+                            $ckFileModel->thumbnail = Image::thumbnail($filePath, CkFile::THUMBNAIL_WIDTH, CkFile::THUMBNAIL_WIDTH);
+                        }
 
-                        if ($ckImageModel->upload() && $ckImageModel->uploadThumbnail()) {
-                            $response[$ckImageModel->orig_name] = [
+                        if ($ckFileModel->upload()) {
+                            if($ckFileModel->type == CkFile::TYPE_IMAGE){
+                                $ckFileModel->uploadThumbnail();
+                            }
+
+                            $response[$ckFileModel->orig_name] = [
                                 'success' => true,
                                 'class' => 'ck-success',
-                                'message' => Yii::t('ckimage', 'File has been uploaded successfully!')
+                                'message' => Yii::t('ckfile', 'File has been uploaded successfully!')
                             ];
 
                             $successUpload++;
                         } else {
-                            $response[$ckImageModel->orig_name] = [
+                            $response[$ckFileModel->orig_name] = [
                                 'success' => false,
                                 'class' => 'ck-error',
-                                'message' => Html::errorSummary($ckImageModel)
+                                'message' => Html::errorSummary($ckFileModel)
                             ];
 
-                            $ckImageModel->delete();
+                            $ckFileModel->delete();
                         }
                     } else {
-                        $response[$ckImageModel->orig_name] = [
+                        $response[$ckFileModel->orig_name] = [
                             'success' => false,
                             'class' => 'ck-error',
-                            'message' => Html::errorSummary($ckImageModel)
+                            'message' => Html::errorSummary($ckFileModel)
                         ];
                     }
                 } catch (UploadException $e) {
-                    $response[$ckImageModel->img_file->name] = [
+                    $response[$ckFileModel->uploaded_file->name] = [
                         'success' => false,
                         'class' => 'ck-error',
                         'message' => $e->getMessage()
@@ -171,10 +210,10 @@ class CkFileController extends Controller
 
             $uploadResponse = $this->renderAjax('_uploadResponse', ['responsesData' => $response, 'filesNumber' => count($files), 'successUpload' => $successUpload]);
         } else {
-            $response[Yii::t('ckimage', 'Error!')] = [
+            $response[Yii::t('ckfile', 'Error!')] = [
                 'success' => false,
                 'class' => 'ck-error',
-                'message' => Yii::t('ckimage', 'An error occured!')
+                'message' => Yii::t('ckfile', 'An error occured!')
             ];
 
             $uploadResponse = $this->renderAjax('_uploadResponse', ['responsesData' => $response, 'filesNumber' => 0, 'successUpload' => 0]);
@@ -195,19 +234,19 @@ class CkFileController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $response = [];
             $post = Yii::$app->request->post();
-            $imgId = $post['id'] ?? null;
+            $fileId = $post['id'] ?? null;
 
-            if ($imgId != null) {
-                $ckImageModel = CkImage::findOne(['id' => $imgId]);
+            if ($fileId != null) {
+                $ckFileModel = CkFile::findOne(['id' => $fileId]);
 
-                if ($ckImageModel && $ckImageModel->delete() && $ckImageModel->deleteFile()) {
+                if ($ckFileModel && $ckFileModel->delete() && $ckFileModel->deleteFile()) {
                     $response['success'] = true;
                 }
             }
 
             return $response;
         } else {
-            throw new NotFoundHttpException(Yii::t('ckimage', 'Page not found!'));
+            throw new NotFoundHttpException(Yii::t('ckfile', 'Page not found!'));
         }
     }
 
@@ -215,28 +254,28 @@ class CkFileController extends Controller
      * @param $id
      * @throws \Exception
      */
-    public function actionGetImage($id)
+    public function actionGetFile($id)
     {
-        $ckImage = CkImage::findOne($id);
+        $ckFile = CkFile::findOne($id);
 
-        if ($ckImage) {
-            $path = Yii::$app->imagemanager->uploadPath;
+        if ($ckFile) {
+            $path = Yii::$app->ckfilemanager->uploadPath;
 
-            if (!is_file($path . DIRECTORY_SEPARATOR . $ckImage->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . $ckImage->file_name)) {
-                throw new \Exception(Yii::t('ckimage', 'File not found!'));
+            if (!is_file($path . DIRECTORY_SEPARATOR . $ckFile->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
+                throw new \Exception(Yii::t('ckfile', 'File not found!'));
             } else {
                 $pointer = null;
 
-                if (is_file($path . DIRECTORY_SEPARATOR . $ckImage->orig_name)) {
-                    $imagePath = $path . DIRECTORY_SEPARATOR . $ckImage->orig_name;
-                    header('Content-type: ' . mime_content_type($imagePath));
-                    header('Content-Length: ' . filesize($imagePath));
-                    $pointer = @fopen($imagePath, 'rb');
-                } elseif (is_file($path . DIRECTORY_SEPARATOR . $ckImage->file_name)) {
-                    $imagePath = $path . DIRECTORY_SEPARATOR . $ckImage->file_name;
-                    header('Content-type: ' . mime_content_type($imagePath));
-                    header('Content-Length: ' . filesize($imagePath));
-                    $pointer = @fopen($imagePath, 'rb');
+                if (is_file($path . DIRECTORY_SEPARATOR . $ckFile->orig_name)) {
+                    $filePath = $path . DIRECTORY_SEPARATOR . $ckFile->orig_name;
+                    header('Content-type: ' . mime_content_type($filePath));
+                    header('Content-Length: ' . filesize($filePath));
+                    $pointer = @fopen($filePath, 'rb');
+                } elseif (is_file($path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
+                    $filePath = $path . DIRECTORY_SEPARATOR . $ckFile->file_name;
+                    header('Content-type: ' . mime_content_type($filePath));
+                    header('Content-Length: ' . filesize($filePath));
+                    $pointer = @fopen($filePath, 'rb');
                 }
 
                 if ($pointer) {
@@ -246,7 +285,7 @@ class CkFileController extends Controller
             }
         }
 
-        throw new \Exception(Yii::t('ckimage', 'File not found!'));
+        throw new \Exception(Yii::t('ckfile', 'File not found!'));
     }
 
     /**
@@ -255,23 +294,23 @@ class CkFileController extends Controller
      */
     public function actionPreviewThumbnail($id)
     {
-        $ckImage = CkImage::findOne($id);
+        $ckImage = CkFile::findOne($id);
 
         if ($ckImage) {
-            $path = Yii::$app->imagemanager->uploadPath . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL_DIRECTORY;
+            $path = Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL_DIRECTORY;
 
-            if (!is_file($path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->file_name)) {
-                throw new \Exception(Yii::t('ckimage', 'File not found!'));
+            if (!is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->file_name)) {
+                throw new \Exception(Yii::t('ckfile', 'File not found!'));
             } else {
                 $pointer = null;
 
-                if (is_file($path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->orig_name)) {
-                    $imagePath = $path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->orig_name;
+                if (is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->orig_name)) {
+                    $imagePath = $path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->orig_name;
                     header('Content-type: ' . mime_content_type($imagePath));
                     header('Content-Length: ' . filesize($imagePath));
                     $pointer = @fopen($imagePath, 'rb');
-                } elseif (is_file($path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->file_name)) {
-                    $imagePath = $path . DIRECTORY_SEPARATOR . CkImage::THUMBNAIL . $ckImage->file_name;
+                } elseif (is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->file_name)) {
+                    $imagePath = $path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->file_name;
                     header('Content-type: ' . mime_content_type($imagePath));
                     header('Content-Length: ' . filesize($imagePath));
                     $pointer = @fopen($imagePath, 'rb');
@@ -284,7 +323,7 @@ class CkFileController extends Controller
             }
         }
 
-        throw new \Exception(Yii::t('ckimage', 'File not found!'));
+        throw new \Exception(Yii::t('ckfile', 'File not found!'));
     }
 
     /**
@@ -297,21 +336,21 @@ class CkFileController extends Controller
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            $ckImageSearch = new CkImageSearch();
-            $className = explode("\\", get_class($ckImageSearch));
-            $ckImages = $ckImageSearch->search([end($className) => ['orig_name' => $name]]);
+            $ckFileSearch = new CkFileSearch();
+            $className = explode("\\", get_class($ckFileSearch));
+            $ckFiles = $ckFileSearch->search([end($className) => ['orig_name' => $name]]);
             $response = [];
 
-            if ($ckImages){
+            if ($ckFiles){
                 $response['success'] = true;
-                $response['result'] = $this->renderPartial('_imageList', ['ckImages' => $ckImages->getModels()]);
+                $response['result'] = $this->renderPartial('_fileList', ['ckFiles' => $ckFiles->getModels()]);
             }else{
                 $response['success'] = false;
             }
 
             return $response;
         } else {
-            throw new NotFoundHttpException(Yii::t('ckimage', 'Page not found!'));
+            throw new NotFoundHttpException(Yii::t('ckfile', 'Page not found!'));
         }
     }
 }

@@ -10,13 +10,13 @@
     display: none;
 }
 
-#no-image{
+#no-file{
     width: 100%;
     text-align: center;
     padding: 30px 0;
 }
 
-.no-image-content{
+.no-file-content{
     border: 1px solid #d7dcdf;
     padding: 15px 20px;
     border-radius: 4px;
@@ -24,12 +24,12 @@
     margin: 0 auto;
 }
 
-#no-image i{
+#no-file i{
     font-size: 85px;
     color: #39a1f4;
 }
 
-.ck-image-list{
+.ck-file-list{
     grid-area: main;
 }
 
@@ -152,7 +152,7 @@
     margin-bottom: 0;
 }
 
-#img-upload-form{
+#file-upload-form{
     float: left;
 }
 
@@ -201,24 +201,24 @@
     width: 0;
 }
 
-.ck-image-list{
+.ck-file-list{
     display: grid;
     grid-column-gap: 10px;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     padding: 10px;
 }
 
-.ck-image-container{
+.ck-file-container{
     padding: 20px;
     font-size: 30px;
     text-align: left;
 }
 
-.ck-image-name{
+.ck-file-name{
     font-size: 12px;
 }
 
-.ck-img-box{
+.ck-file-box{
     text-align: center;
     display: inline-grid;
     padding: 5px;
@@ -229,15 +229,15 @@
     box-shadow: 9px 10px 14px 0px rgba(227,220,227,0.64);
 }
 
-.ck-img-box:hover{
+.ck-file-box:hover{
     outline: 1px solid #39a1f4;
 }
 
-.ck-img-box.active{
+.ck-file-box.active{
     outline: 2px solid #39a1f4;
 }
 
-.ck-img-box img{
+.ck-file-box img{
     margin: 0 auto;
 }
 
@@ -246,7 +246,7 @@
     border: none;
 }
 
-.field-ckimageform-img_files{
+.field-ckfileform-uploaded_files{
     display: none;
 }
 
@@ -286,7 +286,7 @@
     background-color: #f88e86;
 }
 
-.ck-selected-img-container{
+.ck-selected-file-container{
     padding: 15px 0;
 }
 
@@ -294,11 +294,15 @@
     word-wrap: break-word;
 }
 
-.ck-selected-img-name{
+.ck-selected-file-name{
     margin-bottom: 0;
     font-size: 13px;
 }
 
-.ck-img-data{
+.ck-file-data{
     font-size: 10px;
+}
+
+.other-file-preview{
+    font-size: 130px;
 }

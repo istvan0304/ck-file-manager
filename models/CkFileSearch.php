@@ -1,14 +1,14 @@
 <?php
 
-namespace istvan0304\imagemanager\models;
+namespace istvan0304\ckfilemanager\models;
 
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
 /**
- * CkImageSearch represents the model behind the search form about `istvan0304\ck-image-manager\models\CkImage`.
+ * CkFileSearch represents the model behind the search form about `istvan0304\ck-file-manager\models\CkFile`.
  */
-class CkImageSearch extends CkImage
+class CkFileSearch extends CkFile
 {
     /**
      * @inheritdoc
@@ -39,7 +39,7 @@ class CkImageSearch extends CkImage
      */
     public function search($params)
     {
-        $query = CkImage::find();
+        $query = CkFile::find();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);

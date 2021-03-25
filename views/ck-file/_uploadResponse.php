@@ -9,7 +9,7 @@ use Yii;
 
 ?>
 
-<p><?= Yii::t('ckimage', 'Uploaded: ') ?><?= $successUpload ?>/<?= $filesNumber ?>...</p>
+<p><?= Yii::t('ckfile', 'Uploaded: ') ?><?= $successUpload ?>/<?= $filesNumber ?>...</p>
 <?php foreach ($responsesData as $key => $responseData): ?>
     <div class="ck-response-box <?= $responseData['class'] ?>">
         <p><strong><?= $key ?></strong></p>

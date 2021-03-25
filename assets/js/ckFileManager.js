@@ -2,13 +2,13 @@
 
 $(document).ready(function () {
     var $body = $('body'),
-        $imgId = null,
+        $fileId = null,
         $search = $('#ck-search'),
-        $noImg = $('#no-image'),
+        $noFiles = $('#no-file'),
         $sidebar = $('#ck-sidebar'),
-        $uploadBtn = $('#ck-img-upload'),
-        $form = $('#img-upload-form'),
-        $fileInput = $('input[name="CkImageForm[img_files][]"]'),
+        $uploadBtn = $('#ck-file-upload'),
+        $form = $('#file-upload-form'),
+        $fileInput = $('input[name="CkFileForm[uploaded_files][]"]'),
         $progressBar = $('.ck-progress'),
         $details = $('.ck-details'),
         $uploadStatus = $('#ck-upload-status'),
@@ -25,24 +25,28 @@ $(document).ready(function () {
     });
 
     $body.on('beforeSubmit', $form, function () {
-        ckImage.upload();
+        ckFile.upload();
 
         return false;
+    }).on('click', '.ck-file-box', function () {
+        if ($(this).hasClass('active')) {
+            $('.ck-file-box').removeClass('active');
+            sidebar.emptySelect($sidebar);
+        } else {
+            $('.ck-file-box').removeClass('active');
+            $(this).addClass('active');
+            ckFile.getDetails($(this).data());
+        }
+    }).on('dblclick', '.ck-file-box', function () {
+        ckFile.select($(this).data('id'));
+    }).on('click', '#ck-select', function () {
+        ckFile.select($(this).data('id'));
+    }).on('click', '#ck-delete', function () {
+        ckFile.delete($(this).data('id'));
     });
 
     $uploadBtn.click(function () {
-        $('#ckimageform-img_files').trigger('click');
-    });
-
-    $body.on('click', '.ck-img-box', function () {
-        if ($(this).hasClass('active')) {
-            $('.ck-img-box').removeClass('active');
-            sidebar.emptySelect($sidebar);
-        } else {
-            $('.ck-img-box').removeClass('active');
-            $(this).addClass('active');
-            ckImage.getDetails($(this).data());
-        }
+        $('#ckfileform-uploaded_files').trigger('click');
     });
 
     $detailsOpen.click(function () {
@@ -55,18 +59,6 @@ $(document).ready(function () {
 
     $progressClose.click(function () {
         $uploadStatus.css('display', 'none');
-    });
-
-    $body.on('dblclick', '.ck-img-box', function () {
-        ckImage.select($(this).data('id'));
-    });
-
-    $body.on('click', '#ck-select', function () {
-        ckImage.select($(this).data('id'));
-    });
-
-    $body.on('click', '#ck-delete', function () {
-        ckImage.delete($(this).data('id'));
     });
 
     $search.keyup(function () {
@@ -85,37 +77,36 @@ $(document).ready(function () {
     var doneTyping = (search) => {
         if (search !== undefined) {
 
-            $.ajax('/imagemanager/ck-image/ajax-search', {
-                type: "GET",
+            $.ajax('/ckfilemanager/ck-file/ajax-search', {
+                method: "get",
                 dataType: "json",
                 data: {name: search},
                 async: true,
-                success: function (response) {
-                    if (response['success'] && response['result'] !== undefined) {
-                        $('#ck-pjax-image-list').empty().append(response['result']);
-                    }
-                    loader.hide($loader);
+            }).then(function (response) {
+                if (response['success'] && response['result'] !== undefined) {
+                    $('#ck-pjax-file-list').empty().append(response['result']);
                 }
+                loader.hide($loader);
             }).done(function () {
-                ckImage.emptyDetails();
+                ckFile.emptyDetails();
             });
         }
     };
 
-    var ckImage = {
+    var ckFile = {
         upload: () => {
-            let form = document.getElementById('img-upload-form');
+            let form = document.getElementById('file-upload-form');
             let formData = new FormData(form);
 
             if (formData !== undefined) {
                 $('#ck-upload-status').css('display', 'block');
                 loader.show($loader);
 
-                $.ajax('/imagemanager/ck-image/upload', {
+                $.ajax('/ckfilemanager/ck-file/upload', {
                     xhr: function () {
                         var xhr = new window.XMLHttpRequest();
 
-                        xhr.upload.addEventListener("progress", function (evt) {
+                        xhr.upload.addEventListener('progress', function (evt) {
                             if (evt.lengthComputable) {
                                 // var percentComplete = evt.loaded / evt.total;
                                 let percentComplete = Math.round((evt.loaded * 100) / evt.total);
@@ -126,28 +117,27 @@ $(document).ready(function () {
 
                         return xhr;
                     },
-                    method: "POST",
+                    method: 'post',
                     dataType: 'json',
                     data: formData,
                     processData: false,
                     contentType: false,
                     cache: false,
-                    success: function (response) {
-                        if (response['class'] === 'load-error') {
-                            $details.find('.ck-details-body').empty().append(response['message']);
-                        } else {
-                            $details.find('.ck-details-body').empty().append(response);
-                            $.pjax.reload({container: "#ck-pjax-image-list"});
-                            images.checkCount($noImg);
-                        }
-
-                        $uploadStatus.css('display', 'block');
-                        $search.val('');
-                        loader.hide($loader);
-                    },
-                    error: function (xhr) {
-                        console.log(xhr);
+                }).then(function (response) {
+                    if (response['class'] === 'load-error') {
+                        $details.find('.ck-details-body').empty().append(response['message']);
+                    } else {
+                        $details.find('.ck-details-body').empty().append(response);
+                        $.pjax.reload({container: '#ck-pjax-file-list'});
+                        files.checkCount($noFiles);
                     }
+
+                    $uploadStatus.css('display', 'block');
+                    $search.val('');
+                }).catch(function errorHandler(e) {
+                    console.log(e.responseText);
+                }).done(function () {
+                    loader.hide($loader);
                 });
             }
 
@@ -156,10 +146,10 @@ $(document).ready(function () {
 
         getDetails: (data) => {
             if (data !== undefined && typeof data === 'object') {
-                $imgId = data.id;
+                $fileId = data.id;
 
-                $.ajax('/imagemanager/ck-image/get-details', {
-                    method: "GET",
+                $.ajax('/ckfilemanager/ck-file/get-details', {
+                    method: 'GET',
                     dataType: 'json',
                     data: {id: data.id},
                     cache: false,
@@ -176,29 +166,29 @@ $(document).ready(function () {
         },
 
         emptyDetails: () => {
-            $imgId = null;
+            $fileId = null;
             $sidebar.find('.ck-sidebar-content').empty();
             $sidebar.find('.ck-no-select').css('display', 'block');
         },
 
-        select: (imgId) => {
-            if (imgId !== null && typeof imgId === 'number') {
-                var sField = window.queryStringParameter.get(window.location.href, "CKEditorFuncNum");
-                window.top.opener.CKEDITOR.tools.callFunction(sField, '/imagemanager/ck-image/get-image?id=' + $imgId);
+        select: (fileId) => {
+            if (fileId !== null && typeof fileId === 'number') {
+                var sField = window.queryStringParameter.get(window.location.href, 'CKEditorFuncNum');
+                window.top.opener.CKEDITOR.tools.callFunction(sField, '/ckfilemanager/ck-file/get-file?id=' + $fileId);
                 window.self.close();
             }
         },
 
-        delete: (imgId) => {
-            if (imgId !== null && typeof imgId === 'number') {
-                $.ajax('/imagemanager/ck-image/delete', {
-                    method: "POST",
+        delete: (fileId) => {
+            if (fileId !== null && typeof fileId === 'number') {
+                $.ajax('/ckfilemanager/ck-file/delete', {
+                    method: 'post',
                     dataType: 'json',
-                    data: {id: imgId},
+                    data: {id: fileId},
                     cache: false,
                     success: function (response) {
                         if (response['success']) {
-                            $.pjax.reload({container: "#ck-pjax-image-list"});
+                            $.pjax.reload({container: '#ck-pjax-file-list'});
                             sidebar.emptySelect($sidebar);
                         }
                     }
@@ -215,15 +205,15 @@ var sidebar = {
     },
 };
 
-var images = {
-    checkCount: ($noImage) => {
-        let imagesLength = $('.ck-img-box').length;
+var files = {
+    checkCount: ($noFiles) => {
+        let filesLength = $('.ck-img-box').length;
 
-        if ($noImage !== undefined) {
-            if (imagesLength === 0) {
-                $noImage.css('display', 'none');
+        if ($noFiles !== undefined) {
+            if (filesLength === 0) {
+                $noFiles.css('display', 'none');
             } else {
-                $noImage.css('display', 'block');
+                $noFiles.css('display', 'block');
             }
         }
     }
@@ -246,14 +236,14 @@ window.queryStringParameter = {
     },
     set: function (uri, key, value) {
         //replace brackets
-        var keyReplace = key.replace("[]", "").replace(/\[/g, "%5B").replace(/\]/g, "%5D");
+        var keyReplace = key.replace('[]', '').replace(/\[/g, '%5B').replace(/\]/g, '%5D');
         //replace data
-        var re = new RegExp("([?&])" + keyReplace + "=.*?(&|$)", "i");
-        var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+        var re = new RegExp('([?&])' + keyReplace + '=.*?(&|$)', 'i');
+        var separator = uri.indexOf('?') !== -1 ? '&' : '?';
         if (uri.match(re)) {
-            return uri.replace(re, '$1' + keyReplace + "=" + value + '$2');
+            return uri.replace(re, '$1' + keyReplace + '=' + value + '$2');
         } else {
-            return uri + separator + keyReplace + "=" + value;
+            return uri + separator + keyReplace + '=' + value;
         }
     }
 };
