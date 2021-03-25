@@ -1,12 +1,12 @@
 <?php
 
-namespace istvan0304\filemanager\assets;
+namespace istvan0304\ckfilemanager\assets;
 
 use yii\web\AssetBundle;
 
 /**
  * Class CkFileManagerAsset
- * @package istvan0304\filemanager\assets
+ * @package istvan0304\ckfilemanager\assets
  */
 class CkFileManagerAsset extends AssetBundle
 {

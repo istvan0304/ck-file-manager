@@ -1,13 +1,13 @@
 <?php
 
-namespace istvan0304\filemanager\controllers;
+namespace istvan0304\ckfilemanager\controllers;
 
 use Yii;
-use istvan0304\filemanager\models\CkImageSearch;
-use istvan0304\filemanager\assets\CkImageManagerAsset;
-use istvan0304\filemanager\components\UploadException;
-use istvan0304\filemanager\models\CkImage;
-use istvan0304\filemanager\models\CkImageForm;
+use istvan0304\ckfilemanager\models\CkImageSearch;
+use istvan0304\ckfilemanager\assets\CkImageManagerAsset;
+use istvan0304\ckfilemanager\components\UploadException;
+use istvan0304\ckfilemanager\models\CkImage;
+use istvan0304\ckfilemanager\models\CkImageForm;
 use yii\filters\VerbFilter;
 use yii\helpers\Html;
 use yii\imagine\Image;
@@ -18,7 +18,7 @@ use yii\web\UploadedFile;
 
 /**
  * Class CkFileController
- * @package istvan0304\filemanager\controllers
+ * @package istvan0304\ckfilemanager\controllers
  */
 class CkFileController extends Controller
 {

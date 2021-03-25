@@ -1,13 +1,13 @@
 <?php
 
-namespace istvan0304\filemanager;
+namespace istvan0304\ckfilemanager;
 
 use Yii;
 use yii\base\Module as BaseModule;
 
 /**
  * Class Module
- * @package istvan0304\filemanager
+ * @package istvan0304\ckfilemanager
  */
 class Module extends BaseModule
 {
@@ -21,7 +21,7 @@ class Module extends BaseModule
             Yii::$app->i18n->translations['ckfile'] = [
                 'class' => 'yii\i18n\PhpMessageSource',
                 'sourceLanguage' => 'en',
-                'basePath' => '@istvan0304/filemanager/messages'
+                'basePath' => '@istvan0304/ckfilemanager/messages'
             ];
         }
     }

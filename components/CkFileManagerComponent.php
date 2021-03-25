@@ -1,13 +1,13 @@
 <?php
 
-namespace istvan0304\filemanager\components;
+namespace istvan0304\ckfilemanager\components;
 
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 
 /**
  * Class CkFileManagerComponent
- * @package istvan0304\filemanager\components
+ * @package istvan0304\ckfilemanager\components
  */
 class CkFileManagerComponent extends Component
 {

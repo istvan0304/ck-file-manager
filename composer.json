@@ -1,5 +1,5 @@
 {
-    "name": "istvan0304/filemanager",
+    "name": "istvan0304/ckfilemanager",
     "description": "File manager for ck editor",
     "type": "yii2-extension",
     "license": "MIT",
@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "istvan0304\\filemanager\\": ""
+            "istvan0304\\ckfilemanager\\": ""
         }
     }
 }

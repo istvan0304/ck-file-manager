@@ -23,20 +23,20 @@ to the require section of your application's composer.json file.
 
 - Run the migrate to create the database table
 
-        yii migrate --migrationPath=@istvan0304/filemanager/migrations
+        yii migrate --migrationPath=@istvan0304/ckfilemanager/migrations
 
 - Add new modules section to your configuration file:
 
         'modules' => [
-        	'filemanager' => [
-                        'class' => 'istvan0304\filemanager\Module'
+        	'ckfilemanager' => [
+                        'class' => 'istvan0304\ckfilemanager\Module'
                     ]
         ],
 
 - Add a new component in components section of your configuration file:
 
-        'filemanager' => [
-                    'class' => 'istvan0304\filemanager\components\CkFileManagerComponent',
+        'ckfilemanager' => [
+                    'class' => 'istvan0304\ckfilemanager\components\CkFileManagerComponent',
                     'useOriginalFilename' => false,     		     //use filename (seo friendly) or use a hash
                     'uploadPath' => 'uploads/files',                 //set upload path (default /uploads)
                     'allowDuplicateFiles' => false,                  //Let you to upload an files more than one times (default: false)
@@ -54,7 +54,7 @@ Tested only with CKEditor from 2amigOS.
                 'options' => ['rows' => 6],
                 'preset' => 'advanced',
                 'clientOptions' => [
-                        'filebrowserImageBrowseUrl' => yii\helpers\Url::to(['filemanager/ck-file', 'view-mode'=>'iframe', 'select-type'=>'ckeditor']),
+                        'filebrowserImageBrowseUrl' => yii\helpers\Url::to(['ckfilemanager/ck-file', 'view-mode'=>'iframe', 'select-type'=>'ckeditor']),
                     ],
             ]);
             ?>
@@ -66,7 +66,7 @@ if use rbac set access:
         'as access' => [
                 'class' => 'mdm\admin\components\AccessControl',
                 'allowActions' => [
-                    'filemanager/ck-file/get-file',
-                    'filemanager/ck-file/preview-thumbnail'
+                    'ckfilemanager/ck-file/get-file',
+                    'ckfilemanager/ck-file/preview-thumbnail'
                 ]
             ],

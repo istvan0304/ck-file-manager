@@ -1,10 +1,10 @@
 <?php
 
-namespace istvan0304\filemanager\components;
+namespace istvan0304\ckfilemanager\components;
 
 /**
  * Class UploadException
- * @package istvan0304\filemanager\components
+ * @package istvan0304\ckfilemanager\components
  */
 class UploadException extends \Exception
 {
