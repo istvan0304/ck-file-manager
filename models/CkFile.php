@@ -32,8 +32,9 @@ class CkFile extends ActiveRecord
     const SCENARIO_IMAGE = 'image';
     const SCENARIO_OTHER_FILE = 'other-file';
 
-    const MAX_SIZE = 30 * 1024 * 1024;
-    const MAX_FILE_COUNT = 12;
+    const IMAGE_MAX_SIZE = 1 * 1024 * 1024;
+    const FILE_MAX_SIZE = 30 * 1024 * 1024;
+    const MAX_FILE_COUNT = 1;
     const TYPE_IMAGE = 1;
     const TYPE_OTHER_FILE = 2;
     public $uploaded_file;
@@ -71,8 +72,8 @@ class CkFile extends ActiveRecord
     public function rules()
     {
         return [
-            [['uploaded_file', 'thumbnail'], 'file', 'extensions' => implode(', ', self::IMAGE_EXTENSIONS), 'maxSize' => self::MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_IMAGE],
-            [['uploaded_file', 'thumbnail'], 'file', 'extensions' => 'pdf, docx, jpg, jpeg, png', 'maxSize' => self::MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_OTHER_FILE],
+            [['uploaded_file'], 'file', 'extensions' => implode(', ', self::IMAGE_EXTENSIONS), 'maxSize' => self::IMAGE_MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_IMAGE],
+            [['uploaded_file', 'thumbnail'], 'file', 'extensions' => 'pdf, docx, jpg, jpeg, png', 'maxSize' => self::FILE_MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_OTHER_FILE],
             [['file_name', 'orig_name', 'file_hash', 'type'], 'required'],
             [['size'], 'integer'],
             [['create_time', 'update_time'], 'safe'],
@@ -88,7 +89,7 @@ class CkFile extends ActiveRecord
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_IMAGE] = ['id', 'file_name', 'orig_name', 'file_hash', 'mime', 'extension', 'size', 'type', 'create_time', 'update_time'];
+        $scenarios[self::SCENARIO_IMAGE] = ['id', 'uploaded_file', 'thumbnail', 'file_name', 'orig_name', 'file_hash', 'mime', 'extension', 'size', 'type', 'create_time', 'update_time'];
         $scenarios[self::SCENARIO_OTHER_FILE] = ['id', 'file_name', 'orig_name', 'file_hash', 'mime', 'extension', 'size', 'type', 'create_time', 'update_time'];
         return $scenarios;
     }
@@ -193,12 +194,17 @@ class CkFile extends ActiveRecord
         $path = Yii::$app->ckfilemanager->uploadPath;
         $fileName = Yii::$app->ckfilemanager->useOriginalFilename ? $this->orig_name : $this->file_name;
 
-        $thumbPath = Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY;
-        $thumbFileName = Yii::$app->ckfilemanager->useOriginalFilename ? self::THUMBNAIL . $this->orig_name : self::THUMBNAIL . $this->file_name;
+        if($this->type == self::TYPE_IMAGE){
+            $thumbPath = Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY;
+            $thumbFileName = Yii::$app->ckfilemanager->useOriginalFilename ? self::THUMBNAIL . $this->orig_name : self::THUMBNAIL . $this->file_name;
+        }
 
-        if (file_exists($path . DIRECTORY_SEPARATOR . $fileName) && file_exists($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName)) {
+        if (file_exists($path . DIRECTORY_SEPARATOR . $fileName)) {
             FileHelper::unlink($path . DIRECTORY_SEPARATOR . $fileName);
-            FileHelper::unlink($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName);
+
+            if($this->type == self::TYPE_IMAGE && file_exists($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName)){
+                FileHelper::unlink($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName);
+            }
 
             return true;
         }

@@ -166,11 +166,14 @@ class CkFileController extends Controller
                     $ckFileModel->size = $ckFileModel->uploaded_file->size;
                     $ckFileModel->setType();
 
-                    if ($ckFileModel->save()) {
-                        if($ckFileModel->type == CkFile::TYPE_IMAGE){
-                            $ckFileModel->thumbnail = Image::thumbnail($filePath, CkFile::THUMBNAIL_WIDTH, CkFile::THUMBNAIL_WIDTH);
-                        }
+                    if($ckFileModel->type == CkFile::TYPE_IMAGE){
+                        $ckFileModel->thumbnail = Image::thumbnail($filePath, CkFile::THUMBNAIL_WIDTH, CkFile::THUMBNAIL_WIDTH);
+                        $ckFileModel->setScenario(CkFile::SCENARIO_IMAGE);
+                    }else{
+                        $ckFileModel->setScenario(CkFile::SCENARIO_OTHER_FILE);
+                    }
 
+                    if ($ckFileModel->save()) {
                         if ($ckFileModel->upload()) {
                             if($ckFileModel->type == CkFile::TYPE_IMAGE){
                                 $ckFileModel->uploadThumbnail();
