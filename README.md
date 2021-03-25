@@ -13,11 +13,11 @@ The preferred way to install this extension is through composer.
 
 - Run
 
-  $ php composer.phar require istvan0304/ck-file-manager "dev-master"
+  $ php composer.phar require istvan0304/ckfilemanager "dev-master"
 
 or add:
 
-        "istvan0304/ck-file-manager": "dev-master"
+        "istvan0304/ckfilemanager": "dev-master"
 
 to the require section of your application's composer.json file.
 
@@ -54,7 +54,8 @@ Tested only with CKEditor from 2amigOS.
                 'options' => ['rows' => 6],
                 'preset' => 'advanced',
                 'clientOptions' => [
-                        'filebrowserImageBrowseUrl' => yii\helpers\Url::to(['ckfilemanager/ck-file', 'view-mode'=>'iframe', 'select-type'=>'ckeditor']),
+                        'filebrowserImageBrowseUrl' => yii\helpers\Url::to(['ckfilemanager/ck-file/image-manager', 'view-mode'=>'iframe', 'select-type'=>'ckeditor']),
+                        'filebrowserBrowseUrl' => yii\helpers\Url::to(['ckfilemanager/ck-file/file-manager', 'view-mode'=>'iframe', 'select-type'=>'ckeditor']),
                     ],
             ]);
             ?>
