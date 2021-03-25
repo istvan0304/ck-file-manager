@@ -39,7 +39,7 @@ to the require section of your application's composer.json file.
                     'class' => 'istvan0304\ckfilemanager\components\CkFileManagerComponent',
                     'useOriginalFilename' => false,     		     //use filename (seo friendly) or use a hash
                     'uploadPath' => 'uploads/files',                 //set upload path (default /uploads)
-                    'allowDuplicateFiles' => false,                  //Let you to upload an files more than one times (default: false)
+                    'allowDuplicateFile' => false,                  //Let you to upload an files more than one times (default: false)
                 ],
 
 Usage for images

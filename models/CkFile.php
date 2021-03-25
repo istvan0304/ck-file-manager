@@ -28,15 +28,15 @@ class CkFile extends ActiveRecord
     const THUMBNAIL_WIDTH = 130;
     const THUMBNAIL_HEIGHT = 130;
     const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+    const OTHER_FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'jpg', 'jpeg', 'png'];
+    const MAX_FILE_COUNT = 1;
 
     const SCENARIO_IMAGE = 'image';
     const SCENARIO_OTHER_FILE = 'other-file';
 
-    const IMAGE_MAX_SIZE = 1 * 1024 * 1024;
-    const FILE_MAX_SIZE = 30 * 1024 * 1024;
-    const MAX_FILE_COUNT = 1;
-    const TYPE_IMAGE = 1;
-    const TYPE_OTHER_FILE = 2;
+    const TYPE_IMAGE = 1;           // Image file
+    const TYPE_OTHER_FILE = 2;      // Not image file
+
     public $uploaded_file;
     public $thumbnail;
 
@@ -72,8 +72,8 @@ class CkFile extends ActiveRecord
     public function rules()
     {
         return [
-            [['uploaded_file'], 'file', 'extensions' => implode(', ', self::IMAGE_EXTENSIONS), 'maxSize' => self::IMAGE_MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_IMAGE],
-            [['uploaded_file', 'thumbnail'], 'file', 'extensions' => 'pdf, docx, jpg, jpeg, png', 'maxSize' => self::FILE_MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_OTHER_FILE],
+            [['uploaded_file'], 'file', 'extensions' => implode(', ', self::IMAGE_EXTENSIONS), 'maxSize' => Yii::$app->ckfilemanager->maxImageFileSizeUpload, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_IMAGE],
+            [['uploaded_file'], 'file', 'extensions' => implode(', ', self::OTHER_FILE_EXTENSIONS), 'maxSize' => Yii::$app->ckfilemanager->maxFileSizeUpload, 'maxFiles' => self::MAX_FILE_COUNT, 'on' => self::SCENARIO_OTHER_FILE],
             [['file_name', 'orig_name', 'file_hash', 'type'], 'required'],
             [['size'], 'integer'],
             [['create_time', 'update_time'], 'safe'],

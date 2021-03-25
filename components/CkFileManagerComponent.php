@@ -28,6 +28,16 @@ class CkFileManagerComponent extends Component
     public $allowDuplicateFile = false;
 
     /**
+     * @var bool $maxImageFileSizeUpload Maximum images file size.
+     */
+    public $maxImageFileSizeUpload = 3 * 1024 * 1024;       // 3MB
+
+    /**
+     * @var bool $maxFileSizeUpload Maximum not images file size.
+     */
+    public $maxFileSizeUpload = 10 * 1024 * 1024;       // 10MB
+
+    /**
      * Init set config
      */
     public function init() {
