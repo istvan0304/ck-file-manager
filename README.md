@@ -60,6 +60,8 @@ Tested only with CKEditor from 2amigOS.
             ]);
             ?>
 
+        For dynamic path add {'dynamicPath' => 'path'} for filebrowserImageBrowseUrl or filebrowserBrowseUrl url parameters
+
 Access
 ------------
 if use rbac set access:

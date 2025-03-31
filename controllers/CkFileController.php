@@ -143,6 +143,7 @@ class CkFileController extends Controller
         $uploadResponse = '';
 
         if ($ckFileFormModel->load(Yii::$app->request->post())) {
+            $dynamicPath = (Yii::$app->request->post()['CkFileForm']['dynamicPath'] ?? null);
             $files = UploadedFile::getInstances($ckFileFormModel, 'uploaded_files');
 
             foreach ($files as $file) {
@@ -174,9 +175,9 @@ class CkFileController extends Controller
                     }
 
                     if ($ckFileModel->save()) {
-                        if ($ckFileModel->upload()) {
+                        if ($ckFileModel->upload($dynamicPath)) {
                             if($ckFileModel->type == CkFile::TYPE_IMAGE){
-                                $ckFileModel->uploadThumbnail();
+                                $ckFileModel->uploadThumbnail($dynamicPath);
                             }
 
                             $response[$ckFileModel->orig_name] = [
