@@ -13,6 +13,7 @@ use yii\helpers\FileHelper;
  *
  * @property int $id Id
  * @property string $file_name
+ * @property string $path
  * @property string $orig_name
  * @property string $file_hash
  * @property string $mime
@@ -77,7 +78,7 @@ class CkFile extends ActiveRecord
             [['file_name', 'orig_name', 'file_hash', 'type'], 'required'],
             [['size'], 'integer'],
             [['create_time', 'update_time'], 'safe'],
-            [['file_name', 'orig_name', 'file_hash', 'mime'], 'string', 'max' => 255],
+            [['file_name', 'path', 'orig_name', 'file_hash', 'mime'], 'string', 'max' => 255],
             [['extension'], 'string', 'max' => 32],
             [['file_hash'], 'validateFileHash']
         ];
@@ -119,6 +120,7 @@ class CkFile extends ActiveRecord
         return [
             'id' => Yii::t('ckfile', 'ID'),
             'file_name' => Yii::t('ckfile', 'File Name'),
+            'path' => Yii::t('ckimage', 'Path'),
             'orig_name' => Yii::t('ckfile', 'Orig Name'),
             'file_hash' => Yii::t('ckfile', 'File Hash'),
             'mime' => Yii::t('ckfile', 'Mime'),
@@ -191,16 +193,15 @@ class CkFile extends ActiveRecord
      */
     public function deleteFile()
     {
-        $path = Yii::$app->ckfilemanager->uploadPath;
         $fileName = Yii::$app->ckfilemanager->useOriginalFilename ? $this->orig_name : $this->file_name;
 
         if($this->type == self::TYPE_IMAGE){
-            $thumbPath = Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY;
+            $thumbPath = $this->path . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY;
             $thumbFileName = Yii::$app->ckfilemanager->useOriginalFilename ? self::THUMBNAIL . $this->orig_name : self::THUMBNAIL . $this->file_name;
         }
 
-        if (file_exists($path . DIRECTORY_SEPARATOR . $fileName)) {
-            FileHelper::unlink($path . DIRECTORY_SEPARATOR . $fileName);
+        if (file_exists($this->path . DIRECTORY_SEPARATOR . $fileName)) {
+            FileHelper::unlink($this->path . DIRECTORY_SEPARATOR . $fileName);
 
             if($this->type == self::TYPE_IMAGE && file_exists($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName)){
                 FileHelper::unlink($thumbPath . DIRECTORY_SEPARATOR . $thumbFileName);
@@ -218,9 +219,8 @@ class CkFile extends ActiveRecord
     public function isExistsFile()
     {
         $ckFile = self::findOne($this->id);
-        $path = Yii::$app->ckfilemanager->uploadPath;
 
-        if ($ckFile && (is_file($path . DIRECTORY_SEPARATOR . $ckFile->orig_name) || is_file($path . DIRECTORY_SEPARATOR . $ckFile->file_name))) {
+        if ($ckFile && (is_file($this->path . DIRECTORY_SEPARATOR . $ckFile->orig_name) || is_file($this->path . DIRECTORY_SEPARATOR . $ckFile->file_name))) {
             return true;
         }
 

@@ -158,8 +158,10 @@ class CkFileController extends Controller
                     if ($ckFileModel->uploaded_file->getHasError()) {
                         throw new UploadException($ckFileModel->uploaded_file->error);
                     }
+                    $path = ($dynamicPath != null ? Yii::$app->imagemanager->uploadPath . DIRECTORY_SEPARATOR . $dynamicPath : Yii::$app->imagemanager->uploadPath);
 
                     $ckFileModel->file_name = $fileName;
+                    $ckFileModel->path = $path;
                     $ckFileModel->orig_name = $ckFileModel->uploaded_file->name;
                     $ckFileModel->file_hash = hash_file('md5', $filePath);
                     $ckFileModel->mime = $ckFileModel->uploaded_file->type;
@@ -263,20 +265,18 @@ class CkFileController extends Controller
         $ckFile = CkFile::findOne($id);
 
         if ($ckFile) {
-            $path = Yii::$app->ckfilemanager->uploadPath;
-
-            if (!is_file($path . DIRECTORY_SEPARATOR . $ckFile->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
+            if (!is_file($ckFile->path . DIRECTORY_SEPARATOR . $ckFile->orig_name) && !is_file($ckFile->path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
                 throw new \Exception(Yii::t('ckfile', 'File not found!'));
             } else {
                 $pointer = null;
 
-                if (is_file($path . DIRECTORY_SEPARATOR . $ckFile->orig_name)) {
-                    $filePath = $path . DIRECTORY_SEPARATOR . $ckFile->orig_name;
+                if (is_file($ckFile->path . DIRECTORY_SEPARATOR . $ckFile->orig_name)) {
+                    $filePath = $ckFile->path . DIRECTORY_SEPARATOR . $ckFile->orig_name;
                     header('Content-type: ' . mime_content_type($filePath));
                     header('Content-Length: ' . filesize($filePath));
                     $pointer = @fopen($filePath, 'rb');
-                } elseif (is_file($path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
-                    $filePath = $path . DIRECTORY_SEPARATOR . $ckFile->file_name;
+                } elseif (is_file($ckFile->path . DIRECTORY_SEPARATOR . $ckFile->file_name)) {
+                    $filePath = $ckFile->path . DIRECTORY_SEPARATOR . $ckFile->file_name;
                     header('Content-type: ' . mime_content_type($filePath));
                     header('Content-Length: ' . filesize($filePath));
                     $pointer = @fopen($filePath, 'rb');
@@ -301,7 +301,7 @@ class CkFileController extends Controller
         $ckImage = CkFile::findOne($id);
 
         if ($ckImage) {
-            $path = Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL_DIRECTORY;
+            $path = $ckImage->path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL_DIRECTORY;
 
             if (!is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->orig_name) && !is_file($path . DIRECTORY_SEPARATOR . CkFile::THUMBNAIL . $ckImage->file_name)) {
                 throw new \Exception(Yii::t('ckfile', 'File not found!'));
