@@ -1,7 +1,5 @@
 <?php
 
-namespace istvan0304\ckfilemanager\migrations;
-
 use yii\db\Migration;
 
 class m250331_133205_add_path extends Migration
