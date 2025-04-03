@@ -15,7 +15,7 @@ use yii\helpers\Html;
 
     <?php $form = ActiveForm::begin(['id' => 'file-upload-form', 'enableClientValidation' => false]); ?>
 
-    <?= $form->field($ckFileManagerForm, 'dynamicPath')->hiddenInput(['value' => Yii::$app->request->get('dynamicPath')])->label(false) ?>
+    <?= $form->field($ckFileManagerForm, 'dynamic_path')->hiddenInput(['value' => Yii::$app->request->get('dynamicPath')])->label(false) ?>
 
     <?= $form->field($ckFileManagerForm, 'uploaded_files[]')->fileInput(['multiple' => true, 'accept' => $acceptFiles])->label(false) ?>
 

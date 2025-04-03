@@ -152,9 +152,9 @@ class CkFile extends ActiveRecord
      * @return bool
      * @throws \yii\base\Exception
      */
-    public function upload($dynamicpath = null)
+    public function upload($dynamicPath = null)
     {
-        $path = ($dynamicpath != null ? Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . $dynamicpath : Yii::$app->ckfilemanager->uploadPath);
+        $path = ($dynamicPath != null ? $dynamicPath : Yii::$app->ckfilemanager->uploadPath);
         $fileName = Yii::$app->ckfilemanager->useOriginalFilename ? $this->orig_name : $this->file_name;
 
         if (!file_exists($path)) {
@@ -172,9 +172,9 @@ class CkFile extends ActiveRecord
      * @return bool
      * @throws \yii\base\Exception
      */
-    public function uploadThumbnail($dynamicpath = null)
+    public function uploadThumbnail($dynamicPath = null)
     {
-        $path = ($dynamicpath != null ? Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . $dynamicpath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY : Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY);
+        $path = ($dynamicPath != null ? $dynamicPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY : Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . self::THUMBNAIL_DIRECTORY);
         $fileName = Yii::$app->ckfilemanager->useOriginalFilename ? self::THUMBNAIL . $this->orig_name : self::THUMBNAIL . $this->file_name;
 
         if (!file_exists($path)) {

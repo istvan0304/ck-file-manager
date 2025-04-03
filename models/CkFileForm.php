@@ -14,6 +14,8 @@ class CkFileForm extends Model
     const MAX_FILE_COUNT = 12;
     public $uploaded_files;
 
+    public $dynamic_path;
+
     /**
      * @return array
      */
@@ -21,6 +23,7 @@ class CkFileForm extends Model
     {
         return [
             [['uploaded_files'], 'file', 'extensions' => 'jpg, jpeg, png', 'maxSize' => self::MAX_SIZE, 'maxFiles' => self::MAX_FILE_COUNT],
+            [['dynamic_path'], 'safe'],
         ];
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
 /* @var $this \yii\web\View */
-/* @var $ckImageManagerForm istvan0304\ckfilemanager\models\CkImageForm */
-
+/* @var $ckFileManagerForm istvan0304\ckfilemanager\models\CkFileForm */
 /* @var $ckImages */
+/* @var $acceptFiles */
 
 use yii\widgets\Pjax; ?>
 

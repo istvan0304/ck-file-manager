@@ -158,7 +158,7 @@ class CkFileController extends Controller
                     if ($ckFileModel->uploaded_file->getHasError()) {
                         throw new UploadException($ckFileModel->uploaded_file->error);
                     }
-                    $path = ($dynamicPath != null ? Yii::$app->ckfilemanager->uploadPath . DIRECTORY_SEPARATOR . $dynamicPath : Yii::$app->ckfilemanager->uploadPath);
+                    $path = ($dynamicPath != null ? $dynamicPath : Yii::$app->ckfilemanager->uploadPath);
 
                     $ckFileModel->file_name = $fileName;
                     $ckFileModel->path = $path;
