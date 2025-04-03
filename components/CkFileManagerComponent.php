@@ -38,6 +38,11 @@ class CkFileManagerComponent extends Component
     public $maxFileSizeUpload = 10 * 1024 * 1024;       // 10MB
 
     /**
+     * @var null $imageManagerRbacRule Rbac rule name for image manager list
+     */
+    public $imageManagerRbacRule = null;
+
+    /**
      * Init set config
      */
     public function init() {

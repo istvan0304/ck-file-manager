@@ -40,6 +40,7 @@ to the require section of your application's composer.json file.
                     'useOriginalFilename' => false,     		     //use filename (seo friendly) or use a hash
                     'uploadPath' => 'uploads/files',                 //set upload path (default /uploads)
                     'allowDuplicateFile' => false,                  //Let you to upload an files more than one times (default: false)
+                    'imageManagerRbacRule' => 'exampleRule',         //Rbac rule name for image manager file list
                 ],
 
 Usage for images

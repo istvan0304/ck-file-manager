@@ -12,7 +12,7 @@ use istvan0304\ckfilemanager\{assets\CkFileManagerAsset,
 use yii\filters\VerbFilter;
 use yii\helpers\Html;
 use yii\imagine\Image;
-use yii\web\{Controller, NotFoundHttpException, Response, UploadedFile};
+use yii\web\{Controller, ForbiddenHttpException, NotFoundHttpException, Response, UploadedFile};
 
 /**
  * Class CkFileController
@@ -47,8 +47,17 @@ class CkFileController extends Controller
      */
     public function actionImageManager()
     {
+        if(Yii::$app->ckfilemanager->imageManagerRbacRule){
+            $appUser = Yii::$app->user;
+
+            if($appUser && !$appUser->can(Yii::$app->ckfilemanager->imageManagerRbacRule)){
+                throw new ForbiddenHttpException('Access denied.');
+            }
+        }
+
         $ckFileManagerForm = new CkFileForm();
-        $ckImages = CkFile::find()->where(['type' => CkFile::TYPE_IMAGE])->all();
+        $path = (Yii::$app->request->get('dynamicPath') != null ? Yii::$app->request->get('dynamicPath') : Yii::$app->ckfilemanager->uploadPath);
+        $ckImages = CkFile::find()->where(['type' => CkFile::TYPE_IMAGE, 'path' => $path])->all();
         $this->layout = "layout";
         CkFileManagerAsset::register($this->view);
         $acceptFiles = 'image/*';
@@ -143,7 +152,7 @@ class CkFileController extends Controller
         $uploadResponse = '';
 
         if ($ckFileFormModel->load(Yii::$app->request->post())) {
-            $dynamicPath = (Yii::$app->request->post()['CkFileForm']['dynamicPath'] ?? null);
+            $dynamicPath = (Yii::$app->request->post()['CkFileForm']['dynamic_path'] ?? null);
             $files = UploadedFile::getInstances($ckFileFormModel, 'uploaded_files');
 
             foreach ($files as $file) {
